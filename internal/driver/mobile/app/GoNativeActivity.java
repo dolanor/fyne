@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -31,6 +32,7 @@ public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 	private static final int FILE_OPEN_CODE = 1;
 	private static final int FILE_SAVE_CODE = 2;
+	private static final int CAMERA_OPEN_CODE = 3;
 
 	private static final int DEFAULT_INPUT_TYPE = InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
 
@@ -173,6 +175,16 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
+    static void showCameraOpen(String filename) {
+        goNativeActivity.doShowCameraOpen(filename);
+    }
+
+    void doShowCameraOpen(String filename) {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	
+        startActivityForResult(Intent.createChooser(intent, "Capture Image"), CAMERA_OPEN_CODE);
+    }
+
     static void showFileSave(String mimes, String filename) {
         goNativeActivity.doShowFileSave(mimes, filename);
     }
@@ -303,7 +315,7 @@ public class GoNativeActivity extends NativeActivity {
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // unhandled request
-        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE) {
+        if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE && requestCode != CAMERA_OPEN_CODE) {
             return;
         }
 

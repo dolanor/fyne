@@ -59,6 +59,7 @@ type App interface {
 	HideVirtualKeyboard()
 	ShowFileOpenPicker(func(string, func()), *FileFilter)
 	ShowFileSavePicker(func(string, func()), *FileFilter, string)
+	ShowCameraOpen(func(string, func()), string)
 }
 
 // FileFilter is a filter of files.
@@ -154,6 +155,10 @@ func (a *app) ShowFileOpenPicker(callback func(string, func()), filter *FileFilt
 }
 func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
 	driverShowFileSavePicker(callback, filter, filename)
+}
+
+func (a *app) ShowCameraOpen(callback func(string, func()), filename string) {
+	driverShowCameraOpen(callback, filename)
 }
 
 // TODO: do this for all build targets, not just linux (x11 and Android)? If
