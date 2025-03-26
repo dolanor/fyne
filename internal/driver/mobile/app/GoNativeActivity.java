@@ -1,5 +1,8 @@
 package org.golang.app;
 
+import java.util.Base64;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.app.NativeActivity;
 import android.content.Context;
@@ -8,6 +11,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -182,7 +187,7 @@ public class GoNativeActivity extends NativeActivity {
     void doShowCameraOpen(String filename) {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 	
-        startActivityForResult(Intent.createChooser(intent, "Capture Image"), CAMERA_OPEN_CODE);
+        startActivityForResult(intent, CAMERA_OPEN_CODE); //Intent.createChooser(intent, "Capture Image"), CAMERA_OPEN_CODE);
     }
 
     static void showFileSave(String mimes, String filename) {
@@ -325,8 +330,32 @@ public class GoNativeActivity extends NativeActivity {
             return;
         }
 
-        Uri uri = data.getData();
-        filePickerReturned(uri.toString());
+	if (requestCode == CAMERA_OPEN_CODE) {
+
+		Log.i("Fyne", "onActivityResult "+requestCode+ ", " + resultCode + ", " + data);
+		Log.i("Fyne", "data type "+data.getExtras().get("data").getClass().getName());
+		Bitmap photo = (Bitmap)data.getExtras().get("data");
+
+
+		int size = photo.getRowBytes() * photo.getHeight();
+		ByteBuffer buf = ByteBuffer.allocate(size);
+		photo.copyPixelsToBuffer(buf);
+		byte[] byteArray = buf.array();
+		Log.i("Fyne", "first bytes: " + byteArry[4]);
+		String dataAsString = new String(byteArray);
+
+		//ByteArrayOutputStream out = new ByteArrayOutputStream();
+		//photo.compress(CompressFormat.JPEG, 90, out);
+		//String dataAsString = out.toString();
+		
+		//String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
+		Log.i("Fyne", "data string "+dataAsString);
+
+		filePickerReturned(dataAsString);
+	} else {
+		Uri uri = data.getData();
+		filePickerReturned(uri.toString());
+	}
     }
 
     @Override

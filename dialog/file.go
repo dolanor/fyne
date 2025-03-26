@@ -884,6 +884,14 @@ func ShowFileSave(callback func(writer fyne.URIWriteCloser, err error), parent f
 	dialog.Show()
 }
 
+func ShowCameraOpen(callback func(writer fyne.URIWriteCloser, err error), parent fyne.Window) {
+	dialog := NewFileSave(callback, parent)
+	if fileSaveOSOverride(dialog) {
+		return
+	}
+	dialog.Show()
+}
+
 func getFavoriteIcons() map[string]fyne.Resource {
 	if runtime.GOOS == "darwin" {
 		return map[string]fyne.Resource{

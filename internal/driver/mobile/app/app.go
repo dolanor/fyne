@@ -57,9 +57,10 @@ type App interface {
 
 	ShowVirtualKeyboard(KeyboardType)
 	HideVirtualKeyboard()
+	// TODO: name the callback parameter to know what to expect (file URI and closer function)
 	ShowFileOpenPicker(func(string, func()), *FileFilter)
 	ShowFileSavePicker(func(string, func()), *FileFilter, string)
-	ShowCameraOpen(func(string, func()), string)
+	ShowCameraOpen(callback func(fileURI string, closer func()), PWD /* // TODO*/ string)
 }
 
 // FileFilter is a filter of files.
