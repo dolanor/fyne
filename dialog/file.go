@@ -932,20 +932,24 @@ func ShowFileSave(callback func(writer fyne.URIWriteCloser, err error), parent f
 	dialog.Show()
 }
 
-func getFavoritesIcon(location string) fyne.Resource {
-	switch location {
-	case "Documents":
-		return theme.DocumentIcon()
-	case "Desktop":
-		return theme.DesktopIcon()
-	case "Downloads":
-		return theme.DownloadIcon()
-	case "Music":
-		return theme.MediaMusicIcon()
-	case "Pictures":
-		return theme.MediaPhotoIcon()
-	case "Videos":
-		return theme.MediaVideoIcon()
+func ShowCameraOpen(callback func(writer fyne.URIWriteCloser, err error), parent fyne.Window) {
+	dialog := NewFileSave(callback, parent)
+	if fileSaveOSOverride(dialog) {
+		return
+	}
+	dialog.Show()
+}
+
+func getFavoriteIcons() map[string]fyne.Resource {
+	if runtime.GOOS == "darwin" {
+		return map[string]fyne.Resource{
+			"Documents": theme.DocumentIcon(),
+			"Desktop":   theme.DesktopIcon(),
+			"Downloads": theme.DownloadIcon(),
+			"Music":     theme.MediaMusicIcon(),
+			"Pictures":  theme.MediaPhotoIcon(),
+			"Movies":    theme.MediaVideoIcon(),
+		}
 	}
 
 	if (runtime.GOOS == "darwin" && location == "Movies") ||
