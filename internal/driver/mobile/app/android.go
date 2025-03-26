@@ -57,6 +57,7 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"mime"
 	"os"
 	"strconv"
@@ -357,16 +358,17 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
-var cameraCallback func(string, func())
-
 //export cameraOpenReturned
 func cameraOpenReturned(str *C.char) {
-	if cameraCallback == nil {
+	// TODO: maybe we can use a dedicated callback?
+	if fileCallback == nil {
 		return
 	}
 
-	cameraCallback(C.GoString(str), nil)
-	cameraCallback = nil
+	slog.Debug("cameraOpenReturned: calling fileCallback")
+	fileCallback(C.GoString(str), nil)
+	slog.Debug("cameraOpenReturned: fileCallback unset")
+	fileCallback = nil
 }
 
 //export insetsChanged
@@ -445,14 +447,17 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 }
 
 func driverShowCameraOpen(callback func(string, func()), filename string) {
-	cameraCallback = callback
+	slog.Debug("driverShowCameraOpen: fileCallback set")
+	fileCallback = callback
 
 	filenameStr := C.CString(filename)
 	defer C.free(unsafe.Pointer(filenameStr))
 
 	save := func(vm, jniEnv, ctx uintptr) error {
+		slog.Debug("driverShowCameraOpen")
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 		C.showCameraOpen(env, filenameStr)
+		slog.Debug("driverShowCameraOpen: done")
 		return nil
 	}
 
