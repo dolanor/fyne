@@ -6,6 +6,8 @@
 
 package app
 
+import "errors"
+
 /*
 Simple on-screen app debugging for X11. Not an officially supported
 development target for apps, as screens with mice are very different
@@ -151,6 +153,7 @@ func driverShowCameraOpen(func(string, func()), string) {
 
 // driverGetCurrentLocation does nothing on desktop
 func driverGetCurrentLocation() (lat, lon float64, err error) {
+        return 0, 0, errors.New("can not get location on linux desktop yet")
 }
 
 
