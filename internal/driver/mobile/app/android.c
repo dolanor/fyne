@@ -102,7 +102,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "(Ljava/lang/String;)V");
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
-		get_current_location_method = find_static_method(env, current_class, "getCurrentLocation", "()V");
+		get_current_location_method = find_static_method(env, current_class, "getCurrentLocation", "()D");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -294,12 +294,14 @@ void showCameraOpen(JNIEnv* env) {
 	);
 }
 
-void getCurrentLocation(JNIEnv* env) {
-    (*env)->CallStaticVoidMethod(
+jdouble getCurrentLocation(JNIEnv* env) {
+        jdouble lat = 0;
+    lat = (*env)->CallStaticDoubleMethod(
 		env,
 		current_class,
 		get_current_location_method
 	);
+    return lat;
 }
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str) {

@@ -192,21 +192,23 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(intent, CAMERA_OPEN_CODE);
     }
 
-    static void getCurrentLocation() {
-        goNativeActivity.doGetCurrentLocation();
+    static double getCurrentLocation() {
+        return goNativeActivity.doGetCurrentLocation();
     }
 
-    void doGetCurrentLocation() {
+    double doGetCurrentLocation() {
+        double lat = 0;
         try {
                 LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
                 Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-                double lat = loc.getLatitude();
+                lat = loc.getLatitude();
                 double lon = loc.getLongitude();
                 Log.i("Fyne", "latlon:" +  lat + " " + lon);
         } catch (Exception e) {
                 Log.e("Fyne", "doGetCurrentLocation exception", e);
         }
+        return lat;
     }
 
     

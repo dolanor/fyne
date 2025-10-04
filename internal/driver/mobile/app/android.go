@@ -50,7 +50,7 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename);
 void showCameraOpen(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
 
-void getCurrentLocation(JNIEnv* env);
+jdouble getCurrentLocation(JNIEnv* env);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -467,13 +467,18 @@ func driverShowCameraOpen(callback func(string, func()), filename string) {
 func driverGetCurrentLocation() (lat, lon float64, err error) {
 	log := slog.With("func", "driverGetCurrentLocation")
 
+
 	loc := func(vm, jniEnv, ctx uintptr) error {
 		log.Debug("run in vm")
 
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
 
 		//lat, lon, err = C.getCurrentLocation(env)
-		C.getCurrentLocation(env)
+		test := C.getCurrentLocation(env)
+		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", test))
+
+                lat = float64(test)
+		log.Debug("lat in vm:", "lat", lat, "test", test)
 
 		log.Debug("run in vm: done")
 		return err
@@ -482,7 +487,6 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 	if err := mobileinit.RunOnJVM(loc); err != nil {
 		log.Error("run on jvm", "error", err)
 	}
-        lat = 1
         lon = 2
         log.Info("driverGetCurrentLocation", "lat", lat, "lon", lon)
 	return lat, lon, nil
