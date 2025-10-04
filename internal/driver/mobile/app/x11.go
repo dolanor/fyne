@@ -150,4 +150,8 @@ func driverShowFileSavePicker(func(string, func()), *FileFilter, string) {
 func driverShowCameraOpen(func(string, func()), string) {
 }
 
+// driverGetCurrentLocation does nothing on desktop
+func driverGetCurrentLocation() (lat, lon float64, err error) {
+}
+
 
