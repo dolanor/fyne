@@ -13,6 +13,8 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.location.LocationManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -180,15 +182,34 @@ public class GoNativeActivity extends NativeActivity {
         startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
     }
 
-    static void showCameraOpen(String filename) {
-        goNativeActivity.doShowCameraOpen(filename);
+    static void showCameraOpen() {
+        goNativeActivity.doShowCameraOpen();
     }
 
-    void doShowCameraOpen(String filename) {
+    void doShowCameraOpen() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 	
-        startActivityForResult(intent, CAMERA_OPEN_CODE); //Intent.createChooser(intent, "Capture Image"), CAMERA_OPEN_CODE);
+        startActivityForResult(intent, CAMERA_OPEN_CODE);
     }
+
+    static void getCurrentLocation() {
+        goNativeActivity.doGetCurrentLocation();
+    }
+
+    void doGetCurrentLocation() {
+        try {
+                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                double lat = loc.getLatitude();
+                double lon = loc.getLongitude();
+                Log.i("Fyne", "latlon:" +  lat + " " + lon);
+        } catch (Exception e) {
+                Log.e("Fyne", "doGetCurrentLocation exception", e);
+        }
+    }
+
+    
 
     static void showFileSave(String mimes, String filename) {
         goNativeActivity.doShowFileSave(mimes, filename);
@@ -327,6 +348,7 @@ public class GoNativeActivity extends NativeActivity {
         // dialog was cancelled
         if (resultCode != Activity.RESULT_OK) {
             filePickerReturned("");
+            //cameraOpenReturned("");
             return;
         }
 
@@ -341,7 +363,7 @@ public class GoNativeActivity extends NativeActivity {
 		ByteBuffer buf = ByteBuffer.allocate(size);
 		photo.copyPixelsToBuffer(buf);
 		byte[] byteArray = buf.array();
-		Log.i("Fyne", "first bytes: " + byteArry[4]);
+		Log.i("Fyne", "first bytes: " + byteArray[4]);
 		String dataAsString = new String(byteArray);
 
 		//ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -352,6 +374,7 @@ public class GoNativeActivity extends NativeActivity {
 		Log.i("Fyne", "data string "+dataAsString);
 
 		filePickerReturned(dataAsString);
+		//cameraOpenReturned(bmpBytes);
 	} else {
 		Uri uri = data.getData();
 		filePickerReturned(uri.toString());

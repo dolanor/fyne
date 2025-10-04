@@ -56,6 +56,8 @@ static jmethodID show_file_save_method;
 static jmethodID show_camera_open_method;
 static jmethodID finish_method;
 
+static jmethodID get_current_location_method;
+
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
 	if ((*vm)->GetEnv(vm, (void**)&env, JNI_VERSION_1_6) != JNI_OK) {
@@ -99,6 +101,8 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
 		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "(Ljava/lang/String;)V");
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
+
+		get_current_location_method = find_static_method(env, current_class, "getCurrentLocation", "()V");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -282,13 +286,19 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename) {
 	);
 }
 
-void showCameraOpen(JNIEnv* env, char* filename) {
-    jstring filenameJString = (*env)->NewStringUTF(env, filename);
+void showCameraOpen(JNIEnv* env) {
     (*env)->CallStaticVoidMethod(
 		env,
 		current_class,
-		show_camera_open_method,
-		filenameJString
+		show_camera_open_method
+	);
+}
+
+void getCurrentLocation(JNIEnv* env) {
+    (*env)->CallStaticVoidMethod(
+		env,
+		current_class,
+		get_current_location_method
 	);
 }
 

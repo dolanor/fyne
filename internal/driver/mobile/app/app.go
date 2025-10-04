@@ -7,6 +7,9 @@
 package app
 
 import (
+	"log"
+	"log/slog"
+
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
@@ -61,6 +64,8 @@ type App interface {
 	ShowFileOpenPicker(func(string, func()), *FileFilter)
 	ShowFileSavePicker(func(string, func()), *FileFilter, string)
 	ShowCameraOpen(callback func(fileURI string, closer func()), PWD /* // TODO*/ string)
+
+	GetCurrentLocation() (lat, lon float64, err error)
 }
 
 // FileFilter is a filter of files.
@@ -160,6 +165,13 @@ func (a *app) ShowFileSavePicker(callback func(string, func()), filter *FileFilt
 
 func (a *app) ShowCameraOpen(callback func(string, func()), filename string) {
 	driverShowCameraOpen(callback, filename)
+}
+
+func (a *app) GetCurrentLocation() (lat, lon float64, err error) {
+	log.Println("app.GetCurrentLocation")
+	lat, lon, err = driverGetCurrentLocation()
+	slog.Info("driver.mobile.app.GetCurrentLocation", "lat", lat, "lon", lon)
+	return lat, lon, err
 }
 
 // TODO: do this for all build targets, not just linux (x11 and Android)? If

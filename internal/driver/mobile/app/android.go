@@ -47,8 +47,10 @@ void showKeyboard(JNIEnv* env, int keyboardType);
 void hideKeyboard(JNIEnv* env);
 void showFileOpen(JNIEnv* env, char* mimes);
 void showFileSave(JNIEnv* env, char* mimes, char* filename);
-void showCameraOpen(JNIEnv* env, char* filename);
+void showCameraOpen(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
+
+void getCurrentLocation(JNIEnv* env);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -351,16 +353,20 @@ func filePickerReturned(str *C.char) {
 	fileCallback = nil
 }
 
+var cameraCallback func([]byte)
+
 //export cameraOpenReturned
 func cameraOpenReturned(str *C.char) {
 	// TODO: maybe we can use a dedicated callback?
-	if fileCallback == nil {
+	if cameraCallback == nil {
 		return
 	}
 
-	slog.Debug("cameraOpenReturned: calling fileCallback")
+	slog.Debug("cameraOpenReturned: calling cameraCallback")
 	fileCallback(C.GoString(str), nil)
-	slog.Debug("cameraOpenReturned: fileCallback unset")
+	//cameraCallback(C.GoString(str))
+	slog.Debug("cameraOpenReturned: cameraCallback unset")
+	cameraCallback = nil
 	fileCallback = nil
 }
 
@@ -439,17 +445,16 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 	}
 }
 
+//func driverShowCameraOpen(callback func([]byte)) {
 func driverShowCameraOpen(callback func(string, func()), filename string) {
 	slog.Debug("driverShowCameraOpen: fileCallback set")
+	//cameraCallback = callback
 	fileCallback = callback
-
-	filenameStr := C.CString(filename)
-	defer C.free(unsafe.Pointer(filenameStr))
 
 	save := func(vm, jniEnv, ctx uintptr) error {
 		slog.Debug("driverShowCameraOpen")
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showCameraOpen(env, filenameStr)
+		C.showCameraOpen(env)
 		slog.Debug("driverShowCameraOpen: done")
 		return nil
 	}
@@ -457,6 +462,30 @@ func driverShowCameraOpen(callback func(string, func()), filename string) {
 	if err := mobileinit.RunOnJVM(save); err != nil {
 		log.Fatalf("app: %v", err)
 	}
+}
+
+func driverGetCurrentLocation() (lat, lon float64, err error) {
+	log := slog.With("func", "driverGetCurrentLocation")
+
+	loc := func(vm, jniEnv, ctx uintptr) error {
+		log.Debug("run in vm")
+
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+
+		//lat, lon, err = C.getCurrentLocation(env)
+		C.getCurrentLocation(env)
+
+		log.Debug("run in vm: done")
+		return err
+	}
+
+	if err := mobileinit.RunOnJVM(loc); err != nil {
+		log.Error("run on jvm", "error", err)
+	}
+        lat = 1
+        lon = 2
+        log.Info("driverGetCurrentLocation", "lat", lat, "lon", lon)
+	return lat, lon, nil
 }
 
 var mainUserFn func(App)
