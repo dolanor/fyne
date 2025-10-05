@@ -50,12 +50,14 @@ void showFileSave(JNIEnv* env, char* mimes, char* filename);
 void showCameraOpen(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
 
-jdouble getCurrentLocation(JNIEnv* env);
+char* getCurrentLocation(JNIEnv* env);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
 import "C"
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
@@ -445,7 +447,7 @@ func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter,
 	}
 }
 
-//func driverShowCameraOpen(callback func([]byte)) {
+// func driverShowCameraOpen(callback func([]byte)) {
 func driverShowCameraOpen(callback func(string, func()), filename string) {
 	slog.Debug("driverShowCameraOpen: fileCallback set")
 	//cameraCallback = callback
@@ -467,6 +469,10 @@ func driverShowCameraOpen(callback func(string, func()), filename string) {
 func driverGetCurrentLocation() (lat, lon float64, err error) {
 	log := slog.With("func", "driverGetCurrentLocation")
 
+	var coords struct {
+		Lat float64
+		Lon float64
+	}
 
 	loc := func(vm, jniEnv, ctx uintptr) error {
 		log.Debug("run in vm")
@@ -477,8 +483,21 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		test := C.getCurrentLocation(env)
 		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", test))
 
-                lat = float64(test)
 		log.Debug("lat in vm:", "lat", lat, "test", test)
+		if test == nil {
+			return errors.New("failed to get location from JNI")
+		}
+
+		jsonStr := C.GoString(test)
+		if jsonStr == "" {
+			return errors.New("empty location json")
+		}
+
+		err := json.Unmarshal([]byte(jsonStr), &coords)
+		if err != nil {
+			return err
+		}
+		log.Debug("coords in vm:", coords)
 
 		log.Debug("run in vm: done")
 		return err
@@ -487,9 +506,8 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 	if err := mobileinit.RunOnJVM(loc); err != nil {
 		log.Error("run on jvm", "error", err)
 	}
-        lon = 2
-        log.Info("driverGetCurrentLocation", "lat", lat, "lon", lon)
-	return lat, lon, nil
+	log.Info("driverGetCurrentLocation", "lat", coords.Lat, "lon", coords.Lon)
+	return coords.Lat, coords.Lon, nil
 }
 
 var mainUserFn func(App)
