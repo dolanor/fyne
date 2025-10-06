@@ -99,7 +99,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		hide_keyboard_method = find_static_method(env, current_class, "hideKeyboard", "()V");
 		show_file_open_method = find_static_method(env, current_class, "showFileOpen", "(Ljava/lang/String;)V");
 		show_file_save_method = find_static_method(env, current_class, "showFileSave", "(Ljava/lang/String;Ljava/lang/String;)V");
-		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "(Ljava/lang/String;)V");
+		show_camera_open_method = find_static_method(env, current_class, "showCameraOpen", "()V");
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
 		get_current_location_method = find_static_method(env, current_class, "getCurrentLocation", "()Ljava/lang/String;");

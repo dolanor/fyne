@@ -371,13 +371,13 @@ public class GoNativeActivity extends NativeActivity {
 		photo.copyPixelsToBuffer(buf);
 		byte[] byteArray = buf.array();
 		Log.i("Fyne", "first bytes: " + byteArray[4]);
-		String dataAsString = new String(byteArray);
+		//String dataAsString = new String(byteArray);
 
-		//ByteArrayOutputStream out = new ByteArrayOutputStream();
-		//photo.compress(CompressFormat.JPEG, 90, out);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		photo.compress(CompressFormat.JPEG, 90, out);
 		//String dataAsString = out.toString();
 		
-		//String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
+		String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
 		Log.i("Fyne", "data string "+dataAsString);
 
 		filePickerReturned(dataAsString);
