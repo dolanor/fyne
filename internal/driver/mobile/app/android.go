@@ -367,7 +367,10 @@ var cameraCallback func([]byte)
 //export cameraOpenReturned
 func cameraOpenReturned(str *C.char) {
 	// TODO: maybe we can use a dedicated callback?
-	if cameraCallback == nil {
+	//if cameraCallback == nil {
+	//	return
+	//}
+	if fileCallback == nil {
 		return
 	}
 
@@ -375,7 +378,7 @@ func cameraOpenReturned(str *C.char) {
 	fileCallback(C.GoString(str), nil)
 	//cameraCallback(C.GoString(str))
 	slog.Debug("cameraOpenReturned: cameraCallback unset")
-	cameraCallback = nil
+	//cameraCallback = nil
 	fileCallback = nil
 }
 
