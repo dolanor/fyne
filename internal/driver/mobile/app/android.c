@@ -57,6 +57,7 @@ static jmethodID show_camera_open_method;
 static jmethodID finish_method;
 
 static jmethodID get_current_location_method;
+static jmethodID get_last_known_location_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
@@ -103,6 +104,7 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 		finish_method = find_method(env, current_class, "finishActivity", "()V");
 
 		get_current_location_method = find_static_method(env, current_class, "getCurrentLocation", "()Ljava/lang/String;");
+		get_last_known_location_method = find_static_method(env, current_class, "getLastKnownLocation", "()Ljava/lang/String;");
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -292,6 +294,22 @@ void showCameraOpen(JNIEnv* env) {
 		current_class,
 		show_camera_open_method
 	);
+}
+
+char* getLastKnownLocation(JNIEnv* env) {
+        jstring coords = (jstring)(*env)->CallStaticObjectMethod(
+                env,
+                current_class,
+                get_last_known_location_method
+        );
+
+        const char* utf = (*env)->GetStringUTFChars(env, coords, NULL);
+        if (utf == NULL) return "";
+
+        char* result = strdup(utf);
+
+        (*env)->ReleaseStringUTFChars(env, coords, utf);
+        return result;
 }
 
 char* getCurrentLocation(JNIEnv* env) {

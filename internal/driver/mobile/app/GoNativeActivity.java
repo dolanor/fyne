@@ -1,6 +1,7 @@
 package org.golang.app;
 
 import java.util.Base64;
+import java.util.List;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import android.app.Activity;
@@ -191,6 +192,44 @@ public class GoNativeActivity extends NativeActivity {
 	
         startActivityForResult(intent, CAMERA_OPEN_CODE);
     }
+
+
+    LocationManager mLocationManager;
+
+    static String getLastKnownLocation() {
+        return goNativeActivity.doGetLastKnownLocation();
+    }
+
+    String doGetLastKnownLocation() {
+        double lat = 0;
+        double lon = 0;
+        String coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
+
+        mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+
+        Location loc = bestLocation;
+
+        lat = loc.getLatitude();
+        lon = loc.getLongitude();
+        Log.d("Fyne", "latlon:" +  lat + " " + lon);
+        coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
+
+        return coords;
+    }
+
+
 
     static String getCurrentLocation() {
         return goNativeActivity.doGetCurrentLocation();
