@@ -509,7 +509,7 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 	if err := mobileinit.RunOnJVM(loc); err != nil {
 		log.Error("run on jvm", "error", err)
 	}
-	log.Info("driverGetCurrentLocation", "lat", coords.Lat, "lon", coords.Lon)
+	log.Debug("driverGetCurrentLocation", "lat", coords.Lat, "lon", coords.Lon)
 	return coords.Lat, coords.Lon, nil
 }
 

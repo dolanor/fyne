@@ -207,7 +207,7 @@ public class GoNativeActivity extends NativeActivity {
 
                 lat = loc.getLatitude();
                 lon = loc.getLongitude();
-                Log.i("Fyne", "latlon:" +  lat + " " + lon);
+                Log.d("Fyne", "latlon:" +  lat + " " + lon);
                 coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
         } catch (Exception e) {
