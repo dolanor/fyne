@@ -51,6 +51,7 @@ void showCameraOpen(JNIEnv* env);
 void finish(JNIEnv* env, jobject ctx);
 
 char* getCurrentLocation(JNIEnv* env);
+char* getLastKnownLocation(JNIEnv* env);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -481,9 +482,8 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		log.Debug("run in vm")
 
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+                test := C.getLastKnownLocation(env);
 
-		//lat, lon, err = C.getCurrentLocation(env)
-		test := C.getCurrentLocation(env)
 		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", test))
 
 		log.Debug("lat in vm:", "lat", lat, "test", test)
