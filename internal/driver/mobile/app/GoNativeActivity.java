@@ -300,6 +300,10 @@ public class GoNativeActivity extends NativeActivity {
             }
         }
 
+        if (bestLocation == null) {
+                return doGetCurrentLocation();
+        }
+
         Location loc = bestLocation;
 
         lat = loc.getLatitude();
