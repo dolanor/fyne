@@ -482,16 +482,16 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		log.Debug("run in vm")
 
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
-                test := C.getLastKnownLocation(env);
+                locs := C.getLastKnownLocation(env);
 
-		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", test))
+		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", locs))
 
-		log.Debug("lat in vm:", "lat", lat, "test", test)
-		if test == nil {
+		log.Debug("lat in vm:", "lat", lat, "locs", locs)
+		if locs == nil {
 			return errors.New("failed to get location from JNI")
 		}
 
-		jsonStr := C.GoString(test)
+		jsonStr := C.GoString(locs)
 		if jsonStr == "" {
 			return errors.New("empty location json")
 		}
