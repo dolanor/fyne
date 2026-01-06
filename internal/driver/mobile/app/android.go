@@ -486,9 +486,8 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		locs := C.getLastKnownLocation(env)
 		log.Debug("after getLastKnownLocation")
 
-		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", locs))
 
-		log.Debug("lat in vm:", "lat", lat, "locs", locs)
+		log.Debug("lat in vm:", "lat", lat, "locs", locs, "lat type", fmt.Sprintf("%T", locs))
 		if locs == nil {
 			return errors.New("failed to get location from JNI")
 		}
@@ -503,8 +502,6 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 			return err
 		}
 		log.Debug("coords in vm:", coords)
-
-		log.Debug("run in vm: done")
 		return err
 	}
 
