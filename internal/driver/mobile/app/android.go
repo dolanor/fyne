@@ -482,7 +482,9 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		log.Debug("run in vm")
 
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
-                locs := C.getLastKnownLocation(env);
+		log.Debug("before getLastKnownLocation")
+		locs := C.getLastKnownLocation(env)
+		log.Debug("after getLastKnownLocation")
 
 		log.Debug("lat in vm:", "lat type", fmt.Sprintf("%T", locs))
 
