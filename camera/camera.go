@@ -17,7 +17,7 @@ func Open() (io.Reader, error) {
 	defer close(done)
 	var openErr error
 	mobile.ShowCameraOpen(func(reader io.Reader, err error) {
-		slog.Debug("camera.Open: in callback", "reader", reader, "error", err)
+		slog.Debug("camera.Open: in callback", "error", err)
 		if err != nil {
 			fyne.LogError("camera open: fyne returns error:", err)
 			openErr = err
