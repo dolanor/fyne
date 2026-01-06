@@ -1,6 +1,7 @@
 package camera
 
 import (
+	"errors"
 	"io"
 	"log/slog"
 
@@ -21,6 +22,13 @@ func Open() (io.Reader, error) {
 		if err != nil {
 			fyne.LogError("camera open: fyne returns error:", err)
 			openErr = err
+			done <- struct{}{}
+			return
+		}
+
+		if reader == nil {
+			openErr = errors.New("camera intent canceled")
+			fyne.LogError("camera open canceled: ", err)
 			done <- struct{}{}
 			return
 		}
