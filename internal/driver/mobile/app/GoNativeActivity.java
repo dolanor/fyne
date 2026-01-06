@@ -3,6 +3,7 @@ package org.golang.app;
 import java.util.Base64;
 import java.util.List;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.app.NativeActivity;
@@ -36,6 +37,23 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+// new for camera
+// import android.graphics.BitmapFactory;
+// import android.os.Environment;
+import android.widget.Toast;
+import android.content.ContentValues;
+
+// import androidx.activity.result.ActivityResultLauncher;
+// import androidx.activity.result.contract.ActivityResultContracts;
+// import androidx.core.content.FileProvider;
+
+// import java.io.File;
+// import java.io.FileInputStream;
+// import java.io.IOException;
+// import java.text.SimpleDateFormat;
+// import java.util.Date;
+// import java.util.Locale;
+
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
 	private static final int FILE_OPEN_CODE = 1;
@@ -59,6 +77,8 @@ public class GoNativeActivity extends NativeActivity {
 	private EditText mTextEdit;
 	private boolean ignoreKey = false;
 	private boolean keyboardUp = false;
+
+    private Uri photoURI;
 
 	public GoNativeActivity() {
 		super();
@@ -188,9 +208,10 @@ public class GoNativeActivity extends NativeActivity {
     }
 
     void doShowCameraOpen() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-	
-        startActivityForResult(intent, CAMERA_OPEN_CODE);
+        this.launchCamera();
+        // Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+	// 
+        // startActivityForResult(intent, CAMERA_OPEN_CODE);
     }
 
 
@@ -405,23 +426,28 @@ public class GoNativeActivity extends NativeActivity {
 	if (requestCode == CAMERA_OPEN_CODE) {
 
 		Log.i("Fyne", "onActivityResult "+requestCode+ ", " + resultCode + ", " + data);
-		Log.i("Fyne", "data type "+data.getExtras().get("data").getClass().getName());
-		Bitmap photo = (Bitmap)data.getExtras().get("data");
+		//Log.i("Fyne", "data type "+data.getExtras().get("data").getClass().getName());
+ 
+		// Bitmap photo = (Bitmap)data.getExtras().get("data");
 
 
-		int size = photo.getRowBytes() * photo.getHeight();
-		ByteBuffer buf = ByteBuffer.allocate(size);
-		photo.copyPixelsToBuffer(buf);
-		byte[] byteArray = buf.array();
-		Log.i("Fyne", "first bytes: " + byteArray[4]);
-		//String dataAsString = new String(byteArray);
+		// int size = photo.getRowBytes() * photo.getHeight();
+		// ByteBuffer buf = ByteBuffer.allocate(size);
+		// photo.copyPixelsToBuffer(buf);
+		// byte[] byteArray = buf.array();
+		// Log.i("Fyne", "first bytes: " + byteArray[4]);
+		// //String dataAsString = new String(byteArray);
 
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		photo.compress(CompressFormat.JPEG, 90, out);
-		//String dataAsString = out.toString();
+		// ByteArrayOutputStream out = new ByteArrayOutputStream();
+		// photo.compress(CompressFormat.JPEG, 100, out);
+		// //String dataAsString = out.toString();
 		
-		String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
-		Log.i("Fyne", "data string "+dataAsString);
+		Log.i("Fyne", "intent photo uri: "+this.photoURI);
+                byte[] imgBytes = this.getImageBytesFromUri(this.photoURI);
+
+		//String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
+		String dataAsString = Base64.getEncoder().encodeToString(imgBytes);
+		//Log.i("Fyne", "data string "+dataAsString);
 
 		filePickerReturned(dataAsString);
 		//cameraOpenReturned(bmpBytes);
@@ -461,4 +487,148 @@ public class GoNativeActivity extends NativeActivity {
         boolean dark = (config.uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
         setDarkMode(dark);
     }
+
+
+// ====================================
+   
+
+   // MainActivity.java
+
+
+    // private String currentPhotoPath;
+
+    // // Modern way to handle activity results
+    // private final ActivityResultLauncher<Intent> cameraLauncher = this.registerForActivityResult(
+    //         new ActivityResultContracts.StartActivityForResult(),
+    //         result -> {
+    //             if (result.getResultCode() == RESULT_OK) {
+    //                 // Get the image bytes
+    //                 byte[] imageBytes = this.getImageBytes();
+
+    //                 if (imageBytes != null) {
+    //                     // Do something with the bytes
+    //                 }
+    //             }
+    //         }
+    // );
+
+
+
+
+
+    private void launchCamera() {
+        // Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        //
+        // // Create the File where the photo should go
+        // File photoFile = null;
+        // try {
+        //     photoFile = this.createImageFile();
+        // } catch (IOException ex) {
+        //     Toast.makeText(this, "Error creating file", Toast.LENGTH_SHORT).show();
+        //     return;
+        // }
+
+        // // Continue only if the File was successfully created
+        // if (photoFile != null) {
+        //     this.photoURI = FileProvider.getUriForFile(this,
+        //             this.getPackageName() + ".fileprovider",
+        //             photoFile);
+        //     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoURI);
+        //     this.cameraLauncher.launch(takePictureIntent);
+        // }
+        
+
+
+        //////
+        Log.i("Fyne", "launchCamera");
+
+        // Create image URI using MediaStore
+        this.photoURI = this.createImageUri();
+        
+        Log.i("Fyne", "launchCamera. this.photoURI: "+this.photoURI);
+        if (this.photoURI != null) {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoURI);
+            Log.i("Fyne", "launchCamera. start Intent: " + takePictureIntent);
+
+            this.startActivityForResult(takePictureIntent, CAMERA_OPEN_CODE);
+        }
+    }
+
+    private Uri createImageUri() {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.TITLE, "New Picture");
+        values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera");
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+
+        return this.getContentResolver().insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    }
+
+    // private File createImageFile() throws IOException {
+    //     // Create an image file name
+    //     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+    //     String imageFileName = "JPEG_" + timeStamp + "_";
+    //     File storageDir = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+    //     File image = File.createTempFile(
+    //             imageFileName,
+    //             ".jpg",
+    //             storageDir
+    //     );
+
+    //     this.currentPhotoPath = image.getAbsolutePath();
+    //     return image;
+    // }
+
+
+    private byte[] getImageBytesFromUri(Uri uri) {
+        try {
+            InputStream inputStream = this.getContentResolver().openInputStream(uri);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+            // TODO: maybe increase buffer size?
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+
+            inputStream.close();
+            return byteArrayOutputStream.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error reading image", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+    }
+
+    // private byte[] getImageBytes() {
+    //     try {
+    //         // Option 1: Read directly from file
+    //         File file = new File(this.currentPhotoPath);
+    //         byte[] fileBytes = new byte[(int) file.length()];
+
+    //         try (FileInputStream fis = new FileInputStream(file)) {
+    //             fis.read(fileBytes);
+    //         }
+
+    //         return fileBytes;
+
+    //         // Option 2: If you need to compress or resize the image
+    //         /*
+    //         Bitmap bitmap = BitmapFactory.decodeFile(this.currentPhotoPath);
+    //         ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    //         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+    //         return stream.toByteArray();
+    //         */
+
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         Toast.makeText(this, "Error reading image", Toast.LENGTH_SHORT).show();
+    //         return null;
+    //     }
+    // }
+
+
 }
