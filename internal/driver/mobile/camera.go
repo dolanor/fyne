@@ -9,10 +9,10 @@ import (
 )
 
 type hasCameraOpen interface {
-	ShowCameraOpen(callback func(path string, closer func()), filename string)
+	ShowCameraOpen(callback func(base64Image string, closer func()), filename string)
 }
 
-// ShowCameraOpen loads the native file save dialog and returns the chosen file path via the callback func.
+// ShowCameraOpen open the camera intent and return the image as a base64 data.
 func ShowCameraOpen(callback func(r io.Reader, err error), filename string) {
 	drv, ok := fyne.CurrentApp().Driver().(*driver)
 	if !ok {
@@ -24,14 +24,15 @@ func ShowCameraOpen(callback func(r io.Reader, err error), filename string) {
 		return
 	}
 
-	a.ShowCameraOpen(func(path string, closer func()) {
-		slog.Debug("app show camera open", "path", path)
-		if path == "" {
+	a.ShowCameraOpen(func(base64Image string, closer func()) {
+		slog.Debug("app show camera open", "base64Image_nil", base64Image == "")
+		if base64Image == "" {
 			callback(nil, nil)
 			return
 		}
+		// TODO: maybe de-base64 the data here
 
-		buf := bytes.NewBufferString(path)
+		buf := bytes.NewBufferString(base64Image)
 
 		slog.Debug("app show camera open: call callback")
 
