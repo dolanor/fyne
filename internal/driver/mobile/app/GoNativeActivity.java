@@ -49,21 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 // new for camera
-// import android.graphics.BitmapFactory;
-// import android.os.Environment;
 import android.widget.Toast;
 import android.content.ContentValues;
-
-// import androidx.activity.result.ActivityResultLauncher;
-// import androidx.activity.result.contract.ActivityResultContracts;
-// import androidx.core.content.FileProvider;
-
-// import java.io.File;
-// import java.io.FileInputStream;
-// import java.io.IOException;
-// import java.text.SimpleDateFormat;
-// import java.util.Date;
-// import java.util.Locale;
 
 public class GoNativeActivity extends NativeActivity {
 	private static GoNativeActivity goNativeActivity;
@@ -290,9 +277,6 @@ public class GoNativeActivity extends NativeActivity {
 
     void doShowCameraOpen() {
         this.launchCamera();
-        // Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-	// 
-        // startActivityForResult(intent, CAMERA_OPEN_CODE);
     }
 
 
@@ -568,31 +552,13 @@ public class GoNativeActivity extends NativeActivity {
 	if (requestCode == CAMERA_OPEN_CODE) {
 
 		Log.i("Fyne", "onActivityResult "+requestCode+ ", " + resultCode + ", " + data);
-		//Log.i("Fyne", "data type "+data.getExtras().get("data").getClass().getName());
- 
-		// Bitmap photo = (Bitmap)data.getExtras().get("data");
-
-
-		// int size = photo.getRowBytes() * photo.getHeight();
-		// ByteBuffer buf = ByteBuffer.allocate(size);
-		// photo.copyPixelsToBuffer(buf);
-		// byte[] byteArray = buf.array();
-		// Log.i("Fyne", "first bytes: " + byteArray[4]);
-		// //String dataAsString = new String(byteArray);
-
-		// ByteArrayOutputStream out = new ByteArrayOutputStream();
-		// photo.compress(CompressFormat.JPEG, 100, out);
-		// //String dataAsString = out.toString();
 		
 		Log.i("Fyne", "intent photo uri: "+this.photoURI);
                 byte[] imgBytes = this.getImageBytesFromUri(this.photoURI);
 
-		//String dataAsString = Base64.getEncoder().encodeToString(out.toByteArray());
 		String dataAsString = Base64.getEncoder().encodeToString(imgBytes);
-		//Log.i("Fyne", "data string "+dataAsString);
 
 		filePickerReturned(dataAsString);
-		//cameraOpenReturned(bmpBytes);
                 // TODO: should I add that from fyne 2.7/2.8?
                 //final int takeFlags = data.getFlags() & Intent.FLAG_GRANT_READ_URI_PERMISSION;
                 //getContentResolver().takePersistableUriPermission(uri, takeFlags);
@@ -822,57 +788,7 @@ public class GoNativeActivity extends NativeActivity {
     }
 
 
-// ====================================
-   
-
-   // MainActivity.java
-
-
-    // private String currentPhotoPath;
-
-    // // Modern way to handle activity results
-    // private final ActivityResultLauncher<Intent> cameraLauncher = this.registerForActivityResult(
-    //         new ActivityResultContracts.StartActivityForResult(),
-    //         result -> {
-    //             if (result.getResultCode() == RESULT_OK) {
-    //                 // Get the image bytes
-    //                 byte[] imageBytes = this.getImageBytes();
-
-    //                 if (imageBytes != null) {
-    //                     // Do something with the bytes
-    //                 }
-    //             }
-    //         }
-    // );
-
-
-
-
-
     private void launchCamera() {
-        // Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //
-        // // Create the File where the photo should go
-        // File photoFile = null;
-        // try {
-        //     photoFile = this.createImageFile();
-        // } catch (IOException ex) {
-        //     Toast.makeText(this, "Error creating file", Toast.LENGTH_SHORT).show();
-        //     return;
-        // }
-
-        // // Continue only if the File was successfully created
-        // if (photoFile != null) {
-        //     this.photoURI = FileProvider.getUriForFile(this,
-        //             this.getPackageName() + ".fileprovider",
-        //             photoFile);
-        //     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, this.photoURI);
-        //     this.cameraLauncher.launch(takePictureIntent);
-        // }
-        
-
-
-        //////
         Log.i("Fyne", "launchCamera");
 
         // Create image URI using MediaStore
@@ -898,20 +814,6 @@ public class GoNativeActivity extends NativeActivity {
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
     }
 
-    // private File createImageFile() throws IOException {
-    //     // Create an image file name
-    //     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-    //     String imageFileName = "JPEG_" + timeStamp + "_";
-    //     File storageDir = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-    //     File image = File.createTempFile(
-    //             imageFileName,
-    //             ".jpg",
-    //             storageDir
-    //     );
-
-    //     this.currentPhotoPath = image.getAbsolutePath();
-    //     return image;
-    // }
 
 
     private byte[] getImageBytesFromUri(Uri uri) {
@@ -936,32 +838,6 @@ public class GoNativeActivity extends NativeActivity {
         }
     }
 
-    // private byte[] getImageBytes() {
-    //     try {
-    //         // Option 1: Read directly from file
-    //         File file = new File(this.currentPhotoPath);
-    //         byte[] fileBytes = new byte[(int) file.length()];
-
-    //         try (FileInputStream fis = new FileInputStream(file)) {
-    //             fis.read(fileBytes);
-    //         }
-
-    //         return fileBytes;
-
-    //         // Option 2: If you need to compress or resize the image
-    //         /*
-    //         Bitmap bitmap = BitmapFactory.decodeFile(this.currentPhotoPath);
-    //         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    //         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-    //         return stream.toByteArray();
-    //         */
-
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //         Toast.makeText(this, "Error reading image", Toast.LENGTH_SHORT).show();
-    //         return null;
-    //     }
-    // }
 
 
 }
