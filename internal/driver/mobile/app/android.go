@@ -501,7 +501,7 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		if err != nil {
 			return err
 		}
-		log.Debug("coords in vm:", coords)
+		log.Debug("coords in vm", "coords", coords)
 		return err
 	}
 

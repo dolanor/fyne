@@ -210,30 +210,34 @@ public class GoNativeActivity extends NativeActivity {
         double lon = 0;
         String coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
-        mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = mLocationManager.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            Location l = mLocationManager.getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
+        try {
+            mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
+            List<String> providers = mLocationManager.getProviders(true);
+            Location bestLocation = null;
+            for (String provider : providers) {
+                Location l = mLocationManager.getLastKnownLocation(provider);
+                if (l == null) {
+                    continue;
+                }
+                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                    // Found best last known location: %s", l);
+                    bestLocation = l;
+                }
             }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
+
+            if (bestLocation == null) {
+                    return doGetCurrentLocation();
             }
+
+            Location loc = bestLocation;
+
+            lat = loc.getLatitude();
+            lon = loc.getLongitude();
+            Log.d("Fyne", "latlon:" +  lat + " " + lon);
+            coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
+        } catch (Exception e) {
+                Log.e("Fyne", "doLastKnownLocation exception", e);
         }
-
-        if (bestLocation == null) {
-                return doGetCurrentLocation();
-        }
-
-        Location loc = bestLocation;
-
-        lat = loc.getLatitude();
-        lon = loc.getLongitude();
-        Log.d("Fyne", "latlon:" +  lat + " " + lon);
-        coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
         return coords;
     }
@@ -255,7 +259,7 @@ public class GoNativeActivity extends NativeActivity {
 
                 lat = loc.getLatitude();
                 lon = loc.getLongitude();
-                Log.d("Fyne", "latlon:" +  lat + " " + lon);
+                Log.d("Fyne", "latlon: " +  lat + " " + lon);
                 coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
         } catch (Exception e) {
