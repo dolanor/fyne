@@ -211,13 +211,13 @@ public class GoNativeActivity extends NativeActivity {
         String coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
         try {
-            List<String> providers = mLocationManager.getProviders(true);
             if (this.mLocationManager == null) {
                 this.mLocationManager = (LocationManager)this.getApplicationContext().getSystemService(LOCATION_SERVICE);
             }
+            List<String> providers = this.mLocationManager.getProviders(true);
             Location bestLocation = null;
             for (String provider : providers) {
-                Location l = mLocationManager.getLastKnownLocation(provider);
+                Location l = this.mLocationManager.getLastKnownLocation(provider);
                 if (l == null) {
                     continue;
                 }
