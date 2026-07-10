@@ -14,3 +14,9 @@ func GetCurrent() (lat, lon float64, err error) {
 	lat, lon, err = mobile.GetCurrentLocation()
 	return lat, lon, err
 }
+
+func StartUpdatingLocation() error {
+	slog.Info("fyne/location.StartUpdatingLocation")
+	err := mobile.StartUpdatingLocation()
+	return err
+}

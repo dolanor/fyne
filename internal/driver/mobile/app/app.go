@@ -174,6 +174,12 @@ func (a *app) GetCurrentLocation() (lat, lon float64, err error) {
 	return lat, lon, err
 }
 
+func (a *app) StartUpdatingLocation() (err error) {
+	log.Println("app.StartUpdatingLocation")
+	driverStartUpdatingLocation()
+	return nil
+}
+
 // TODO: do this for all build targets, not just linux (x11 and Android)? If
 // so, should package gl instead of this package call RegisterFilter??
 //

@@ -52,6 +52,7 @@ void finish(JNIEnv* env, jobject ctx);
 
 char* getCurrentLocation(JNIEnv* env);
 char* getLastKnownLocation(JNIEnv* env);
+void  startUpdatingLocation(JNIEnv* env);
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str);
 */
@@ -486,7 +487,6 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 		locs := C.getLastKnownLocation(env)
 		log.Debug("after getLastKnownLocation")
 
-
 		log.Debug("lat in vm:", "lat", lat, "locs", locs, "lat type", fmt.Sprintf("%T", locs))
 		if locs == nil {
 			return errors.New("failed to get location from JNI")
@@ -510,6 +510,14 @@ func driverGetCurrentLocation() (lat, lon float64, err error) {
 	}
 	log.Debug("driverGetCurrentLocation", "lat", coords.Lat, "lon", coords.Lon)
 	return coords.Lat, coords.Lon, nil
+}
+
+func driverStartUpdatingLocation() {
+	mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
+		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
+		C.startUpdatingLocation(env)
+		return nil
+	})
 }
 
 var mainUserFn func(App)

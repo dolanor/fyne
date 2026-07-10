@@ -15,11 +15,13 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
@@ -270,7 +272,66 @@ public class GoNativeActivity extends NativeActivity {
         return coords;
     }
 
+    private LocationListener mLocationListener = null;
+
+    static void startUpdatingLocation() {
+        goNativeActivity.doStartUpdatingLocation(); 
+    }
+
+    void doStartUpdatingLocation() {
+        // TODO cleanup logs
+        int updateRefreshInMillisecond = 60_000;
+        float updateRefreshInMeters = 10;
+
+        Log.i("Fyne", "doStartUpdatingLocation");
+        if (this.mLocationManager == null) {
+        Log.i("Fyne", "doStartUpdatingLocation: init location manager");
+            this.mLocationManager = (LocationManager)this.getApplicationContext().getSystemService(LOCATION_SERVICE);
+        }
+
+        if (this.mLocationListener == null) {
+        Log.i("Fyne", "doStartUpdatingLocation: init location listener");
+            this.mLocationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    Log.i("Fyne", "doStartUpdatingLocation: location listener: onLocationChanged: " + location);
+                }
+
+                @Override
+                public void onStatusChanged(String p, int s, Bundle b) {
+                    Log.i("Fyne", "doStartUpdatingLocation: onStatusChanged");
+                }
+
+                @Override
+                public void onProviderEnabled(String p) {
+                    Log.i("Fyne", "doStartUpdatingLocation: onProviderEnabled");
+                }
+
+                @Override
+                public void onProviderDisabled(String p) {
+                    Log.i("Fyne", "doStartUpdatingLocation: onProviderDisabled");
+                }
+            };
+        }
     
+        Log.i("Fyne", "doStartUpdatingLocation: request gps provider updates");
+        // Mise à jour toutes les 10 secondes ou 10 mètres de déplacement
+        if (this.mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            this.mLocationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                updateRefreshInMillisecond, updateRefreshInMeters,
+                this.mLocationListener, Looper.getMainLooper());
+        }
+        Log.i("Fyne", "doStartUpdatingLocation: request network provider updates");
+        if (this.mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            this.mLocationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                updateRefreshInMillisecond, updateRefreshInMeters,
+                this.mLocationListener, Looper.getMainLooper());
+        }
+        Log.i("Fyne", "doStartUpdatingLocation: done");
+    }
+// TODO: add the removal of getting new location to avoid draining battery
 
     static void showFileSave(String mimes, String filename) {
         goNativeActivity.doShowFileSave(mimes, filename);

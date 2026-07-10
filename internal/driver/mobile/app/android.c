@@ -58,6 +58,7 @@ static jmethodID finish_method;
 
 static jmethodID get_current_location_method;
 static jmethodID get_last_known_location_method;
+static jmethodID start_updating_location_method;
 
 jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 	JNIEnv* env;
@@ -105,6 +106,8 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void* savedState, size_
 
 		get_current_location_method = find_static_method(env, current_class, "getCurrentLocation", "()Ljava/lang/String;");
 		get_last_known_location_method = find_static_method(env, current_class, "getLastKnownLocation", "()Ljava/lang/String;");
+                start_updating_location_method = find_static_method(env, current_class, "startUpdatingLocation", "()V");
+
 
 		setCurrentContext(activity->vm, (*env)->NewGlobalRef(env, activity->clazz));
 
@@ -331,6 +334,11 @@ char* getCurrentLocation(JNIEnv* env) {
 
         (*env)->ReleaseStringUTFChars(env, coords, utf);
         return result;
+}
+
+void startUpdatingLocation(JNIEnv* env) {
+    (*env)->CallStaticVoidMethod(
+        env, current_class, start_updating_location_method);
 }
 
 void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass clazz, jstring str) {
