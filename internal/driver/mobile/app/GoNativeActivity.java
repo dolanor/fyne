@@ -211,8 +211,10 @@ public class GoNativeActivity extends NativeActivity {
         String coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
         try {
-            mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
             List<String> providers = mLocationManager.getProviders(true);
+            if (this.mLocationManager == null) {
+                this.mLocationManager = (LocationManager)this.getApplicationContext().getSystemService(LOCATION_SERVICE);
+            }
             Location bestLocation = null;
             for (String provider : providers) {
                 Location l = mLocationManager.getLastKnownLocation(provider);
