@@ -300,8 +300,6 @@ void showCameraOpen(JNIEnv* env) {
 }
 
 char* getLastKnownLocation(JNIEnv* env) {
-        LOG_INFO("android.c: getLastKnownLocation(env): jmethodid");
-        LOG_INFO("android.c: getLastKnownLocation(env): jmethodid: %p", get_last_known_location_method);
         jstring coords = (jstring)(*env)->CallStaticObjectMethod(
                 env,
                 current_class,
@@ -318,9 +316,6 @@ char* getLastKnownLocation(JNIEnv* env) {
 }
 
 char* getCurrentLocation(JNIEnv* env) {
-        LOG_INFO("android.c: getCurrentLocation(env): jmethodid");
-        LOG_INFO("android.c: getCurrentLocation(env): jmethodid: %p", get_current_location_method);
-
         jstring coords = (jstring)(*env)->CallStaticObjectMethod(
                 env,
                 current_class,
