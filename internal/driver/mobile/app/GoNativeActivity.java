@@ -218,14 +218,37 @@ public class GoNativeActivity extends NativeActivity {
             }
             List<String> providers = this.mLocationManager.getProviders(true);
             Location bestLocation = null;
+
+            long now = SystemClock.elapsedRealtimeNanos();
             for (String provider : providers) {
                 Location l = this.mLocationManager.getLastKnownLocation(provider);
                 if (l == null) {
+                    Log.d("Fyne", "no last know location for provider: " + provider);
                     continue;
                 }
-                if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+
+
+                if (bestLocation != null ) {
+                    long ageNanos = now - bestLocation.getElapsedRealtimeNanos();
+                    long ageMs = ageNanos / 1_000_000;
+
+                    boolean isStale = ageMs > 2 * 60 * 1000;
+                    
+                    Log.d("Fyne", "previous best location time (" + bestLocation.getProvider() + "): " + ageMs * 2 * 60 * 1000);
+                    Log.d("Fyne", "current location time (" + provider + "): " + now  * 2 * 60 * 1_000 * 1_000_000);
+                    Log.d("Fyne", "isStale: " + isStale);
+                    if (isStale) {
+                        bestLocation = l;
+                        continue;
+                    }
+                }
+
+                if (bestLocation == null ||
+                    l.getAccuracy() < bestLocation.getAccuracy()) {
+
                     // Found best last known location: %s", l);
                     bestLocation = l;
+                    continue;
                 }
             }
 
