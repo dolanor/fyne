@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.InputType;
@@ -212,6 +213,7 @@ public class GoNativeActivity extends NativeActivity {
         double lon = 0;
         String coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
 
+        String jsonResponse = "[ ";
         try {
             if (this.mLocationManager == null) {
                 this.mLocationManager = (LocationManager)this.getApplicationContext().getSystemService(LOCATION_SERVICE);
@@ -219,7 +221,9 @@ public class GoNativeActivity extends NativeActivity {
             List<String> providers = this.mLocationManager.getProviders(true);
             Location bestLocation = null;
 
-            long now = SystemClock.elapsedRealtimeNanos();
+
+            long sysElapsed = SystemClock.elapsedRealtimeNanos();
+            int i = 0;
             for (String provider : providers) {
                 Location l = this.mLocationManager.getLastKnownLocation(provider);
                 if (l == null) {
@@ -227,46 +231,75 @@ public class GoNativeActivity extends NativeActivity {
                     continue;
                 }
 
-
-                if (bestLocation != null ) {
-                    long ageNanos = now - bestLocation.getElapsedRealtimeNanos();
-                    long ageMs = ageNanos / 1_000_000;
-
-                    boolean isStale = ageMs > 2 * 60 * 1000;
-                    
-                    Log.d("Fyne", "previous best location time (" + bestLocation.getProvider() + "): " + ageMs * 2 * 60 * 1000);
-                    Log.d("Fyne", "current location time (" + provider + "): " + now  * 2 * 60 * 1_000 * 1_000_000);
-                    Log.d("Fyne", "isStale: " + isStale);
-                    if (isStale) {
-                        bestLocation = l;
-                        continue;
-                    }
+                if (i != 0) {
+                  jsonResponse += " ,\n";
                 }
 
-                if (bestLocation == null ||
-                    l.getAccuracy() < bestLocation.getAccuracy()) {
+                jsonResponse += " { ";
 
-                    // Found best last known location: %s", l);
-                    bestLocation = l;
-                    continue;
-                }
-            }
+                jsonResponse += "\"Provider\": \"" + provider + "\", ";
+                jsonResponse += "\"MonotonicElapsedNanos\": " + sysElapsed + ", ";
+                jsonResponse += "\"LocationMonotonicElapsedNanos\": " + l.getElapsedRealtimeNanos() + ", ";
+                jsonResponse += "\"Accuracy\": " + l.getAccuracy() + ", ";
+                jsonResponse += "\"Latitude\": " + l.getLatitude() + ", ";
+                jsonResponse += "\"Longitude\": " + l.getLongitude() + ", ";
 
-            if (bestLocation == null) {
-                    return doGetCurrentLocation();
-            }
+                jsonResponse += "\"SystemElapsed\": " + sysElapsed + ", ";
+                jsonResponse += "\"NowElapsed\": " + (sysElapsed - l.getElapsedRealtimeNanos()) + ", ";
+                
+                jsonResponse += "\"placeholder\": " + "true";
+                jsonResponse += " },";
+              }
 
-            Location loc = bestLocation;
+              // TODO make it safer with null and size checks
+              jsonResponse = jsonResponse.substring(0, jsonResponse.length() - 1);
 
-            lat = loc.getLatitude();
-            lon = loc.getLongitude();
-            Log.d("Fyne", "latlon:" +  lat + " " + lon);
-            coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
+              jsonResponse += " ]";
+
+              i++;
+
+
+
+//                if (bestLocation != null ) {
+//                    long ageNanos = now - bestLocation.getElapsedRealtimeNanos();
+//                    long ageMs = ageNanos / 1_000_000;
+//
+//                    boolean isStale = ageMs > 1 * 20 * 1000;
+//                    
+//                    Log.d("Fyne", "previous best location time (" + bestLocation.getProvider() + "): " + bestLocation.getElapsedRealtimeNanos() );
+//                    Log.d("Fyne", "current location time (" + provider + "): " + now );
+//                    Log.d("Fyne", "isStale: " + isStale + ", age: " + ageMs);
+//                    if (isStale) {
+//                        bestLocation = l;
+//                        continue;
+//                    }
+//                }
+//
+//                if (bestLocation == null ||
+//                    l.getAccuracy() < bestLocation.getAccuracy()) {
+//
+//                    // Found best last known location: %s", l);
+//                    bestLocation = l;
+//                    continue;
+//                }
+//            }
+//
+//            if (bestLocation == null) {
+//                    return doGetCurrentLocation();
+//            }
+//
+//            Location loc = bestLocation;
+//
+//            lat = loc.getLatitude();
+//            lon = loc.getLongitude();
+//            Log.d("Fyne", "latlon:" +  lat + " " + lon);
+//            coords = "{ \"Lat\": " + lat + ", \"Lon\": " + lon + "}";
         } catch (Exception e) {
                 Log.e("Fyne", "doLastKnownLocation exception", e);
         }
 
-        return coords;
+
+        return jsonResponse;
     }
 
 

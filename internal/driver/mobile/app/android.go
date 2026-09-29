@@ -471,45 +471,51 @@ func driverShowCameraOpen(callback func(string, func()), filename string) {
 	}
 }
 
+var currentBest location
+
 func driverGetCurrentLocation() (lat, lon float64, err error) {
 	log := slog.With("func", "driverGetCurrentLocation")
 
-	var coords struct {
-		Lat float64
-		Lon float64
-	}
-
+	var locs []location
 	loc := func(vm, jniEnv, ctx uintptr) error {
 		log.Debug("run in vm")
 
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv))
 		log.Debug("before getLastKnownLocation")
-		locs := C.getLastKnownLocation(env)
+		locsString := C.getLastKnownLocation(env)
 		log.Debug("after getLastKnownLocation")
 
-		log.Debug("lat in vm:", "lat", lat, "locs", locs, "lat type", fmt.Sprintf("%T", locs))
-		if locs == nil {
+		log.Debug("lat in vm:", "lat", lat, "locs", locs, "lat type", fmt.Sprintf("%T", locsString))
+		if locsString == nil {
 			return errors.New("failed to get location from JNI")
 		}
 
-		jsonStr := C.GoString(locs)
+		jsonStr := C.GoString(locsString)
 		if jsonStr == "" {
 			return errors.New("empty location json")
 		}
 
-		err := json.Unmarshal([]byte(jsonStr), &coords)
+		log.Debug("json string", "json", jsonStr)
+
+		err := json.Unmarshal([]byte(jsonStr), &locs)
 		if err != nil {
-			return err
+			return fmt.Errorf("unmarshal json", "error", err, "json", jsonStr)
 		}
-		log.Debug("coords in vm", "coords", coords)
+		log.Debug("locs in vm", "locs", locs)
 		return err
 	}
 
 	if err := mobileinit.RunOnJVM(loc); err != nil {
 		log.Error("run on jvm", "error", err)
 	}
-	log.Debug("driverGetCurrentLocation", "lat", coords.Lat, "lon", coords.Lon)
-	return coords.Lat, coords.Lon, nil
+
+	now := time.Now()
+	log.Info("current best", "current", currentBest, "pointer", fmt.Sprintf("%p", &currentBest))
+	bestLoc := getBestLocation(locs, currentBest, now)
+
+	log.Debug("driverGetCurrentLocation", "lat", bestLoc.Latitude, "lon", bestLoc.Longitude)
+	currentBest = bestLoc
+	return bestLoc.Latitude, bestLoc.Longitude, nil
 }
 
 func driverStartUpdatingLocation() {
