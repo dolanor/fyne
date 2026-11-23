@@ -940,16 +940,20 @@ func ShowCameraOpen(callback func(writer fyne.URIWriteCloser, err error), parent
 	dialog.Show()
 }
 
-func getFavoriteIcons() map[string]fyne.Resource {
-	if runtime.GOOS == "darwin" {
-		return map[string]fyne.Resource{
-			"Documents": theme.DocumentIcon(),
-			"Desktop":   theme.DesktopIcon(),
-			"Downloads": theme.DownloadIcon(),
-			"Music":     theme.MediaMusicIcon(),
-			"Pictures":  theme.MediaPhotoIcon(),
-			"Movies":    theme.MediaVideoIcon(),
-		}
+func getFavoritesIcon(location string) fyne.Resource {
+	switch location {
+	case "Documents":
+		return theme.DocumentIcon()
+	case "Desktop":
+		return theme.DesktopIcon()
+	case "Downloads":
+		return theme.DownloadIcon()
+	case "Music":
+		return theme.MediaMusicIcon()
+	case "Pictures":
+		return theme.MediaPhotoIcon()
+	case "Videos":
+		return theme.MediaVideoIcon()
 	}
 
 	if (runtime.GOOS == "darwin" && location == "Movies") ||
