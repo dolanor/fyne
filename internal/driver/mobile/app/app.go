@@ -12,7 +12,6 @@ import (
 
 	"fyne.io/fyne/v2/internal/async"
 	"fyne.io/fyne/v2/internal/driver/mobile/event/lifecycle"
-	"fyne.io/fyne/v2/internal/driver/mobile/event/size"
 	"fyne.io/fyne/v2/internal/driver/mobile/gl"
 
 	// Initialize necessary mobile functionality, such as logging.
@@ -167,26 +166,4 @@ func (a *app) StartUpdatingLocation() (err error) {
 	log.Println("app.StartUpdatingLocation")
 	driverStartUpdatingLocation()
 	return nil
-}
-
-// TODO: do this for all build targets, not just linux (x11 and Android)? If
-// so, should package gl instead of this package call RegisterFilter??
-//
-// TODO: does Android need this?? It seems to work without it (Nexus 7,
-// KitKat). If only x11 needs this, should we move this to x11.go??
-func (a *app) registerGLViewportFilter() {
-	a.RegisterFilter(func(e any) any {
-		if e, ok := e.(size.Event); ok {
-			a.glctx.Viewport(0, 0, e.WidthPx, e.HeightPx)
-		}
-		return e
-	})
-}
-
-func screenOrientation(width, height int) size.Orientation {
-	if width > height {
-		return size.OrientationLandscape
-	}
-
-	return size.OrientationPortrait
 }
